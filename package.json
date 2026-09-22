@@ -1,0 +1,17 @@
+{
+  "name": "scaffold-template",
+  "version": "0.0.0",
+  "private": true,
+  "description": "\"Use this template\" starter for a new Scaffold knowledge base.",
+  "license": "CC-BY-NC-SA-4.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@daanish02/scaffold-core": "github:daanish02/scaffold-core#main",
+    "astro": "^4.0.0"
+  }
+}

@@ -1,0 +1,29 @@
+---
+import { getCollection } from "astro:content";
+import ConceptLayout from "../layouts/ConceptLayout.astro";
+
+// Placeholder homepage — replace with your KB's real landing page once
+// sample content is swapped for real sections/concepts.
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const concepts = await getCollection("concepts");
+---
+
+<ConceptLayout title="Home" kb="math">
+  <h1 class="page-title">Scaffold · [Subject]</h1>
+  <p class="subtitle">
+    This is the template's placeholder homepage. Replace it with your KB's real landing page.
+  </p>
+  <div class="prose">
+    <h2>Sample content</h2>
+    <ul>
+      {
+        concepts.map((entry) => (
+          <li>
+            <a href={`${base}${entry.slug}/`}>{entry.data.title}</a> — {entry.data.difficulty} ·{" "}
+            {entry.data.status}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</ConceptLayout>

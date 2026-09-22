@@ -1,0 +1,77 @@
+---
+id: "math:sample-section:sample-concept"
+kb: "math"
+title: "Sample concept (delete me)"
+section: "sample-section"
+prerequisites:
+  - "math:linear-algebra:vectors"
+related:
+  - "math:linear-algebra:matrices-as-transformations"
+difficulty: "intro"
+status: "draft"
+hasInteractive: true
+tags: ["sample"]
+description: "Placeholder concept page demonstrating every scaffold-core component. Delete before publishing a real KB."
+---
+
+import Callout from "@daanish02/scaffold-core/components/content/Callout.astro";
+import CodeCell from "@daanish02/scaffold-core/components/content/CodeCell.astro";
+import TransformViz from "@daanish02/scaffold-core/components/interactive/TransformViz.astro";
+import SelfCheck from "@daanish02/scaffold-core/components/interactive/SelfCheck.astro";
+
+> **This is sample content.** Replace or delete this file before publishing a real KB — it exists to show every `scaffold-core` component wired up in one page, per the [AUTHORING.md](https://github.com/daanish02/scaffold-core/blob/main/docs/AUTHORING.md) template.
+
+## Intuition
+
+A 2x2 matrix can be read as an instruction for moving every point in the plane at once - stretching, squashing, rotating, or flipping space. Some directions survive this move unchanged in orientation, only scaled: those are the interesting ones.
+
+## Visual / interactive
+
+export const initialMatrix = { a: 2, b: 0, c: 0, d: 1 };
+
+<TransformViz initial={initialMatrix} />
+
+## Formal definition
+
+For a square matrix $A$, a nonzero vector $v$ is an **eigenvector** with **eigenvalue** $\lambda$ if:
+
+$$
+Av = \lambda v
+$$
+
+For a 2x2 matrix, eigenvalues solve the characteristic equation $\lambda^2 - (a+d)\lambda + (ad - bc) = 0$.
+
+export const sampleCode = `import numpy as np
+
+A = np.array([[2, 0], [0, 1]])
+values, vectors = np.linalg.eig(A)
+print(values)`;
+
+<CodeCell lang="python">{sampleCode}</CodeCell>
+
+## Common pitfalls
+
+<Callout label="Common pitfall">
+  Not every real matrix has real eigenvectors - a rotation matrix, for example, has none (its eigenvalues are complex).
+</Callout>
+
+<Callout label="Common pitfall">
+  Eigenvectors are only defined up to scale - any nonzero multiple of an eigenvector is also an eigenvector for the same eigenvalue.
+</Callout>
+
+## Self-check
+
+export const questions = [
+  {
+    question: "If Av = 3v for some nonzero v, what is the eigenvalue?",
+    answer: "3",
+    why: "The scalar multiplying v on the right-hand side of Av = λv is the eigenvalue by definition.",
+  },
+  {
+    question: "Can a matrix have more eigenvectors than its dimension allows as independent directions?",
+    answer: "No - an nxn matrix has at most n linearly independent eigenvectors.",
+    why: "Eigenvectors for distinct eigenvalues are linearly independent, and the vector space only has n dimensions.",
+  },
+];
+
+<SelfCheck questions={questions} />
