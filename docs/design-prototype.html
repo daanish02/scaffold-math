@@ -1,0 +1,963 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Scaffold — Eigenvectors</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+        --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+        --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+        /* light (default) */
+        --bg: #f1f3f1;
+        --bg-panel: #fafbfa;
+        --bg-raised: #ffffff;
+        --ink: #1c2531;
+        --ink-soft: #4b5563;
+        --ink-faint: #8a93a0;
+        --rule: #d7dcd9;
+        --rule-strong: #b7bfbb;
+        --accent: #2e7a78;
+        --accent-soft: #e4f0ef;
+        --accent-ink: #1b4c4b;
+        --warn: #b36a2e;
+        --warn-soft: #f5e9dc;
+        --chip-bg: #eaeeea;
+        --shadow:
+          0 1px 2px rgba(28, 37, 49, 0.06), 0 4px 16px rgba(28, 37, 49, 0.04);
+
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #141a21;
+          --bg-panel: #1a222b;
+          --bg-raised: #202a35;
+          --ink: #e9e7dd;
+          --ink-soft: #b7bcc4;
+          --ink-faint: #737c88;
+          --rule: #2b3540;
+          --rule-strong: #3b4753;
+          --accent: #5fb6b0;
+          --accent-soft: #1e3735;
+          --accent-ink: #8fd1cc;
+          --warn: #d69a5e;
+          --warn-soft: #332619;
+          --chip-bg: #232d38;
+          --shadow:
+            0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(0, 0, 0, 0.24);
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #141a21;
+        --bg-panel: #1a222b;
+        --bg-raised: #202a35;
+        --ink: #e9e7dd;
+        --ink-soft: #b7bcc4;
+        --ink-faint: #737c88;
+        --rule: #2b3540;
+        --rule-strong: #3b4753;
+        --accent: #5fb6b0;
+        --accent-soft: #1e3735;
+        --accent-ink: #8fd1cc;
+        --warn: #d69a5e;
+        --warn-soft: #332619;
+        --chip-bg: #232d38;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(0, 0, 0, 0.24);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--serif);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: var(--accent-ink);
+      }
+
+      /* ---------- Top bar ---------- */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        padding-top: calc(12px + env(safe-area-inset-top, 0px));
+        background: var(--bg-panel);
+        border-bottom: 1px solid var(--rule);
+      }
+      .menu-btn {
+        background: none;
+        border: 1px solid var(--rule-strong);
+        border-radius: 6px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--ink);
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      .brand {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 15px;
+        letter-spacing: 0.01em;
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        white-space: nowrap;
+      }
+      .brand .kb {
+        font-weight: 400;
+        color: var(--ink-faint);
+      }
+      .brand .kb::before {
+        content: "/";
+        margin-right: 6px;
+        color: var(--rule-strong);
+      }
+      .topbar-spacer {
+        flex: 1;
+      }
+      .search-hint {
+        display: none;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--ink-faint);
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        padding: 6px 10px;
+        background: var(--bg-raised);
+      }
+      @media (min-width: 720px) {
+        .search-hint {
+          display: block;
+        }
+      }
+
+      .theme-toggle {
+        display: flex;
+        background: var(--bg-raised);
+        border: 1px solid var(--rule);
+        border-radius: 999px;
+        padding: 2px;
+        gap: 2px;
+      }
+      .theme-toggle button {
+        background: none;
+        border: none;
+        width: 30px;
+        height: 28px;
+        border-radius: 999px;
+        color: var(--ink-faint);
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .theme-toggle button.active {
+        background: var(--accent-soft);
+        color: var(--accent-ink);
+      }
+
+      /* ---------- Layout ---------- */
+      .shell {
+        display: flex;
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+
+      .sidebar {
+        width: 250px;
+        flex-shrink: 0;
+        border-right: 1px solid var(--rule);
+        padding: 20px 16px 60px;
+        font-family: var(--sans);
+        font-size: 13.5px;
+        height: calc(100dvh - 61px);
+        position: sticky;
+        top: 61px;
+        overflow-y: auto;
+      }
+      .side-group {
+        margin-bottom: 18px;
+      }
+      .side-group-label {
+        color: var(--ink-faint);
+        font-size: 11.5px;
+        font-weight: 500;
+        margin-bottom: 6px;
+        padding: 0 8px;
+      }
+      .side-link {
+        display: block;
+        padding: 6px 8px;
+        border-radius: 6px;
+        color: var(--ink-soft);
+        text-decoration: none;
+        line-height: 1.4;
+      }
+      .side-link:hover {
+        background: var(--chip-bg);
+      }
+      .side-link.current {
+        background: var(--accent-soft);
+        color: var(--accent-ink);
+        font-weight: 500;
+      }
+
+      .sidebar-overlay {
+        display: none;
+      }
+
+      main {
+        flex: 1;
+        min-width: 0;
+        padding: 40px 24px 100px;
+      }
+      .content-col {
+        max-width: 640px;
+        margin: 0 auto;
+      }
+
+      .breadcrumb {
+        font-family: var(--sans);
+        font-size: 13px;
+        color: var(--ink-faint);
+        margin-bottom: 18px;
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .breadcrumb a {
+        color: var(--ink-faint);
+        text-decoration: none;
+      }
+      .breadcrumb a:hover {
+        color: var(--accent-ink);
+      }
+
+      h1.page-title {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: 34px;
+        line-height: 1.15;
+        margin: 0 0 10px;
+        letter-spacing: -0.01em;
+      }
+      .subtitle {
+        font-family: var(--sans);
+        color: var(--ink-soft);
+        font-size: 16px;
+        line-height: 1.5;
+        margin: 0 0 20px;
+        max-width: 60ch;
+      }
+
+      .meta-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+        font-family: var(--sans);
+        font-size: 12.5px;
+      }
+      .pill {
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: var(--chip-bg);
+        color: var(--ink-soft);
+      }
+      .pill.accent {
+        background: var(--accent-soft);
+        color: var(--accent-ink);
+      }
+
+      .prereqs {
+        font-family: var(--sans);
+        font-size: 13.5px;
+        margin-bottom: 32px;
+        padding: 14px 16px;
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+        background: var(--bg-panel);
+      }
+      .prereqs-label {
+        color: var(--ink-faint);
+        font-size: 11.5px;
+        margin-bottom: 8px;
+        display: block;
+      }
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--bg-raised);
+        border: 1px solid var(--rule-strong);
+        color: var(--ink);
+        text-decoration: none;
+        padding: 6px 11px;
+        border-radius: 7px;
+        font-size: 13px;
+        transition: border-color 0.15s ease;
+      }
+      .chip:hover {
+        border-color: var(--accent);
+        color: var(--accent-ink);
+      }
+      .chip .kb-tag {
+        color: var(--ink-faint);
+        font-family: var(--mono);
+        font-size: 11px;
+      }
+
+      .prose {
+        font-size: 18px;
+        line-height: 1.72;
+        color: var(--ink);
+      }
+      .prose p {
+        margin: 0 0 20px;
+      }
+      .prose h2 {
+        font-family: var(--serif);
+        font-size: 24px;
+        font-weight: 600;
+        margin: 40px 0 14px;
+        letter-spacing: -0.005em;
+      }
+      .prose h3 {
+        font-family: var(--serif);
+        font-size: 19px;
+        font-weight: 600;
+        margin: 30px 0 10px;
+      }
+
+      .katex {
+        font-size: 1.05em;
+      }
+
+      .term {
+        border-bottom: 1.5px dotted var(--accent);
+        cursor: help;
+        position: relative;
+      }
+
+      .callout {
+        font-family: var(--sans);
+        font-size: 14.5px;
+        line-height: 1.6;
+        border-left: 3px solid var(--warn);
+        background: var(--warn-soft);
+        padding: 12px 16px;
+        border-radius: 0 8px 8px 0;
+        margin: 24px 0;
+        color: var(--ink);
+      }
+      .callout strong {
+        display: block;
+        font-size: 12.5px;
+        text-transform: none;
+        color: var(--warn);
+        margin-bottom: 4px;
+        font-weight: 600;
+      }
+
+      pre.code {
+        font-family: var(--mono);
+        font-size: 13.5px;
+        background: var(--bg-panel);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+        padding: 14px 16px;
+        overflow-x: auto;
+        line-height: 1.6;
+        margin: 24px 0;
+        color: var(--ink-soft);
+      }
+      pre.code .kw {
+        color: var(--accent-ink);
+      }
+
+      /* ---------- Interactive demo ---------- */
+      .demo {
+        margin: 32px 0 36px;
+        border: 1px solid var(--rule);
+        border-radius: 10px;
+        background: var(--bg-panel);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .demo-header {
+        font-family: var(--sans);
+        font-size: 12.5px;
+        color: var(--ink-faint);
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--rule);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .demo-body {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      canvas#xform {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 6px;
+        background: var(--bg-raised);
+      }
+      .sliders {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px 16px;
+        font-family: var(--sans);
+      }
+      .slider-group label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12.5px;
+        color: var(--ink-soft);
+        margin-bottom: 4px;
+      }
+      .slider-group output {
+        font-family: var(--mono);
+        color: var(--accent-ink);
+      }
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--accent);
+      }
+      .demo-note {
+        font-family: var(--sans);
+        font-size: 12.5px;
+        color: var(--ink-faint);
+        line-height: 1.5;
+      }
+
+      footer.family {
+        max-width: 640px;
+        margin: 60px auto 0;
+        padding-top: 24px;
+        border-top: 1px solid var(--rule);
+        font-family: var(--sans);
+      }
+      footer.family .label {
+        font-size: 12px;
+        color: var(--ink-faint);
+        margin-bottom: 10px;
+      }
+      .family-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .family-link {
+        font-size: 13px;
+        padding: 7px 12px;
+        border-radius: 7px;
+        background: var(--bg-panel);
+        border: 1px solid var(--rule);
+        color: var(--ink-soft);
+        text-decoration: none;
+      }
+      .family-link.self {
+        color: var(--accent-ink);
+        border-color: var(--accent);
+      }
+
+      /* ---------- Mobile ---------- */
+      @media (max-width: 880px) {
+        .sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          height: 100dvh;
+          width: 82%;
+          max-width: 300px;
+          background: var(--bg);
+          z-index: 50;
+          transform: translateX(-105%);
+          transition: transform 0.22s ease;
+          padding-top: calc(20px + env(safe-area-inset-top, 0px));
+          box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+        }
+        .sidebar.open {
+          transform: translateX(0);
+        }
+        .sidebar-overlay.open {
+          display: block;
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.35);
+          z-index: 40;
+        }
+        main {
+          padding: 28px 18px 80px;
+        }
+        h1.page-title {
+          font-size: 27px;
+        }
+        .prose {
+          font-size: 17px;
+        }
+        .sliders {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Open navigation">
+        ☰
+      </button>
+      <div class="brand">Scaffold <span class="kb">math</span></div>
+      <div class="topbar-spacer"></div>
+      <div class="search-hint">⌘K to search</div>
+      <div class="theme-toggle" id="themeToggle">
+        <button data-mode="light" aria-label="Light mode">☀</button>
+        <button data-mode="system" aria-label="System" class="active">◐</button>
+        <button data-mode="dark" aria-label="Dark mode">☾</button>
+      </div>
+    </div>
+
+    <div class="sidebar-overlay" id="overlay"></div>
+
+    <div class="shell">
+      <nav class="sidebar" id="sidebar">
+        <div class="side-group">
+          <div class="side-group-label">Foundations</div>
+          <a class="side-link" href="#">Logic &amp; proofs</a>
+          <a class="side-link" href="#">Exponentials &amp; logs</a>
+          <a class="side-link" href="#">Trigonometry</a>
+        </div>
+        <div class="side-group">
+          <div class="side-group-label">Linear Algebra</div>
+          <a class="side-link" href="#">Vectors</a>
+          <a class="side-link" href="#">Matrices as transformations</a>
+          <a class="side-link current" href="#"
+            >Eigenvectors &amp; eigenvalues</a
+          >
+          <a class="side-link" href="#">Singular value decomposition</a>
+        </div>
+        <div class="side-group">
+          <div class="side-group-label">Calculus</div>
+          <a class="side-link" href="#">Limits</a>
+          <a class="side-link" href="#">Derivatives</a>
+          <a class="side-link" href="#">Gradients &amp; Jacobians</a>
+        </div>
+      </nav>
+
+      <main>
+        <div class="content-col">
+          <div class="breadcrumb">
+            <a href="#">Math</a><span>›</span><a href="#">Linear Algebra</a
+            ><span>›</span><span>Eigenvectors</span>
+          </div>
+
+          <h1 class="page-title">Eigenvectors &amp; eigenvalues</h1>
+          <p class="subtitle">
+            The directions a transformation doesn't rotate away from — only
+            stretches or shrinks.
+          </p>
+
+          <div class="meta-row">
+            <span class="pill accent">core</span>
+            <span class="pill">~12 min</span>
+            <span class="pill">has interactive</span>
+          </div>
+
+          <div class="prereqs">
+            <span class="prereqs-label">Before this, you should know</span>
+            <div class="chip-row">
+              <a class="chip" href="#"
+                ><span class="kb-tag">math</span> Matrices as transformations</a
+              >
+              <a class="chip" href="#"
+                ><span class="kb-tag">math</span> Systems of equations</a
+              >
+              <a class="chip" href="#"
+                ><span class="kb-tag">math</span> Vectors</a
+              >
+            </div>
+          </div>
+
+          <div class="prose">
+            <p>
+              Apply a matrix <span id="eq1"></span> to almost any vector, and it
+              rotates — it points somewhere new. But for certain special
+              vectors, the transformation only stretches or compresses them; the
+              direction stays exactly the same. These are the
+              <span
+                class="term"
+                title="A vector whose direction is unchanged by a linear transformation, up to a scalar."
+                >eigenvectors</span
+              >
+              of the matrix, and the amount they're stretched by is the
+              corresponding
+              <span
+                class="term"
+                title="The scalar factor by which an eigenvector is stretched or compressed."
+                >eigenvalue</span
+              >.
+            </p>
+            <p>
+              Formally, <span id="eq2"></span> is an eigenvector of
+              <span id="eq1b"></span> with eigenvalue <span id="eq3"></span> if:
+            </p>
+          </div>
+
+          <div style="text-align: center; margin: 8px 0 26px">
+            <span id="eq4" style="font-size: 1.3em"></span>
+          </div>
+
+          <div class="prose">
+            <p>
+              Try it below: adjust the matrix and watch which directions the
+              grid stretches along without turning.
+            </p>
+          </div>
+
+          <div class="demo">
+            <div class="demo-header">
+              <span>Interactive · Transform visualizer</span>
+              <span>drag or use sliders</span>
+            </div>
+            <div class="demo-body">
+              <canvas id="xform" width="600" height="340"></canvas>
+              <div class="sliders">
+                <div class="slider-group">
+                  <label>a <output id="out-a">1.6</output></label>
+                  <input
+                    type="range"
+                    id="s-a"
+                    min="-2"
+                    max="2"
+                    step="0.05"
+                    value="1.6"
+                  />
+                </div>
+                <div class="slider-group">
+                  <label>b <output id="out-b">0.4</output></label>
+                  <input
+                    type="range"
+                    id="s-b"
+                    min="-2"
+                    max="2"
+                    step="0.05"
+                    value="0.4"
+                  />
+                </div>
+                <div class="slider-group">
+                  <label>c <output id="out-c">0.4</output></label>
+                  <input
+                    type="range"
+                    id="s-c"
+                    min="-2"
+                    max="2"
+                    step="0.05"
+                    value="0.4"
+                  />
+                </div>
+                <div class="slider-group">
+                  <label>d <output id="out-d">0.9</output></label>
+                  <input
+                    type="range"
+                    id="s-d"
+                    min="-2"
+                    max="2"
+                    step="0.05"
+                    value="0.9"
+                  />
+                </div>
+              </div>
+              <div class="demo-note">
+                The teal lines mark the eigenvector directions — the only lines
+                through the origin that don't rotate under this transformation,
+                only scale.
+              </div>
+            </div>
+          </div>
+
+          <div class="callout">
+            <strong>Common pitfall</strong>
+            Not every matrix has real eigenvectors — a pure rotation, for
+            instance, turns every vector, so its eigenvalues come out complex.
+          </div>
+
+          <div class="prose">
+            <h2>Why this matters later</h2>
+            <p>
+              PCA finds the eigenvectors of a covariance matrix to identify
+              directions of greatest variance. Google's original PageRank found
+              the eigenvector of a web-link matrix. And diagonalizing a matrix —
+              rewriting it purely in terms of its eigenvectors — is what makes
+              repeated transformations (like <span id="eq5"></span>) cheap to
+              compute.
+            </p>
+          </div>
+
+          <pre
+            class="code"
+          ><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+A = np.array([[1.6, 0.4], [0.4, 0.9]])
+eigenvalues, eigenvectors = np.linalg.eig(A)</pre>
+
+          <footer class="family">
+            <div class="label">Part of the Scaffold family</div>
+            <div class="family-grid">
+              <span class="family-link self">Math</span>
+              <a class="family-link" href="#">CS</a>
+              <a class="family-link" href="#">Hardware</a>
+              <a class="family-link" href="#">ML</a>
+              <a class="family-link" href="#">DL</a>
+              <a class="family-link" href="#">Applied DL</a>
+              <a class="family-link" href="#">Finance</a>
+            </div>
+          </footer>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // Theme handling
+      const root = document.documentElement;
+      const toggle = document.getElementById("themeToggle");
+      function setMode(mode) {
+        if (mode === "system") root.removeAttribute("data-theme");
+        else root.setAttribute("data-theme", mode);
+        [...toggle.children].forEach((b) =>
+          b.classList.toggle("active", b.dataset.mode === mode),
+        );
+        try {
+          localStorage.setItem("scaffold-theme", mode);
+        } catch (e) {}
+      }
+      toggle.addEventListener("click", (e) => {
+        const btn = e.target.closest("button");
+        if (btn) setMode(btn.dataset.mode);
+      });
+      try {
+        const saved = localStorage.getItem("scaffold-theme");
+        if (saved) setMode(saved);
+      } catch (e) {}
+
+      // Mobile sidebar
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("overlay");
+      document.getElementById("menuBtn").addEventListener("click", () => {
+        sidebar.classList.add("open");
+        overlay.classList.add("open");
+      });
+      overlay.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+        overlay.classList.remove("open");
+      });
+
+      // KaTeX render
+      katex.render("A", document.getElementById("eq1"), {
+        throwOnError: false,
+      });
+      katex.render("A", document.getElementById("eq1b"), {
+        throwOnError: false,
+      });
+      katex.render("\\vec{v}", document.getElementById("eq2"), {
+        throwOnError: false,
+      });
+      katex.render("\\lambda", document.getElementById("eq3"), {
+        throwOnError: false,
+      });
+      katex.render(
+        "A\\vec{v} = \\lambda \\vec{v}",
+        document.getElementById("eq4"),
+        { throwOnError: false },
+      );
+      katex.render("A^{100}", document.getElementById("eq5"), {
+        throwOnError: false,
+      });
+
+      // Transform visualizer
+      const canvas = document.getElementById("xform");
+      const ctx = canvas.getContext("2d");
+      const sA = document.getElementById("s-a"),
+        sB = document.getElementById("s-b"),
+        sC = document.getElementById("s-c"),
+        sD = document.getElementById("s-d");
+      const oA = document.getElementById("out-a"),
+        oB = document.getElementById("out-b"),
+        oC = document.getElementById("out-c"),
+        oD = document.getElementById("out-d");
+
+      function getCssVar(name) {
+        return getComputedStyle(document.documentElement)
+          .getPropertyValue(name)
+          .trim();
+      }
+
+      function eigen2x2(a, b, c, d) {
+        const tr = a + d,
+          det = a * d - b * c;
+        const disc = tr * tr - 4 * det;
+        if (disc < 0) return [];
+        const sq = Math.sqrt(disc);
+        const l1 = (tr + sq) / 2,
+          l2 = (tr - sq) / 2;
+        const vecs = [];
+        [l1, l2].forEach((l) => {
+          let vx, vy;
+          if (Math.abs(b) > 1e-6) {
+            vx = b;
+            vy = l - a;
+          } else if (Math.abs(c) > 1e-6) {
+            vx = l - d;
+            vy = c;
+          } else {
+            vx = 1;
+            vy = 0;
+          }
+          const norm = Math.hypot(vx, vy) || 1;
+          vecs.push([vx / norm, vy / norm]);
+        });
+        return vecs;
+      }
+
+      function draw() {
+        const a = parseFloat(sA.value),
+          b = parseFloat(sB.value),
+          c = parseFloat(sC.value),
+          d = parseFloat(sD.value);
+        oA.textContent = a.toFixed(2);
+        oB.textContent = b.toFixed(2);
+        oC.textContent = c.toFixed(2);
+        oD.textContent = d.toFixed(2);
+
+        const W = canvas.width,
+          H = canvas.height;
+        const cx = W / 2,
+          cy = H / 2,
+          scale = 40;
+
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = getCssVar("--bg-raised");
+        ctx.fillRect(0, 0, W, H);
+
+        const rule = getCssVar("--rule");
+        const ruleStrong = getCssVar("--rule-strong");
+        const accent = getCssVar("--accent");
+        const ink = getCssVar("--ink-soft");
+
+        function toScreen(x, y) {
+          return [cx + x * scale, cy - y * scale];
+        }
+
+        // transformed grid lines
+        ctx.strokeStyle = rule;
+        ctx.lineWidth = 1;
+        for (let i = -6; i <= 6; i++) {
+          // vertical line x=i transformed
+          ctx.beginPath();
+          for (let t = -6; t <= 6; t += 0.25) {
+            const x = i,
+              y = t;
+            const tx = a * x + b * y,
+              ty = c * x + d * y;
+            const [sx, sy] = toScreen(tx, ty);
+            t === -6 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+          }
+          ctx.stroke();
+          ctx.beginPath();
+          for (let t = -6; t <= 6; t += 0.25) {
+            const x = t,
+              y = i;
+            const tx = a * x + b * y,
+              ty = c * x + d * y;
+            const [sx, sy] = toScreen(tx, ty);
+            t === -6 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+          }
+          ctx.stroke();
+        }
+
+        // axes
+        ctx.strokeStyle = ruleStrong;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, cy);
+        ctx.lineTo(W, cy);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx, 0);
+        ctx.lineTo(cx, H);
+        ctx.stroke();
+
+        // eigenvector lines
+        const vecs = eigen2x2(a, b, c, d);
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 2.5;
+        vecs.forEach(([vx, vy]) => {
+          const len = 8;
+          const [x1, y1] = toScreen(vx * len, vy * len);
+          const [x2, y2] = toScreen(-vx * len, -vy * len);
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+        });
+
+        if (vecs.length === 0) {
+          ctx.fillStyle = ink;
+          ctx.font = "13px sans-serif";
+          ctx.fillText("No real eigenvectors — this matrix rotates", 14, 22);
+        }
+      }
+
+      [sA, sB, sC, sD].forEach((s) => s.addEventListener("input", draw));
+      draw();
+      window.addEventListener("resize", draw);
+    </script>
+  </body>
+</html>

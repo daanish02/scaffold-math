@@ -1,0 +1,118 @@
+/* Color/type tokens now defined per-variant (each has its own visual identity).
+   This file holds structural rules shared across all three only. */
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--serif);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent-ink); }
+
+/* ---- variant switcher (dev-only scaffolding, never shipped) ---- */
+.variant-switcher {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 100;
+  display: flex;
+  gap: 4px;
+  background: var(--bg-raised);
+  border: 1px solid var(--rule-strong);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: var(--shadow);
+  font-family: var(--sans);
+}
+.variant-switcher a {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  text-decoration: none;
+  color: var(--ink-soft);
+}
+.variant-switcher a.active {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-weight: 500;
+}
+
+.pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-size: 12.5px;
+}
+.pill.accent { background: var(--accent-soft); color: var(--accent-ink); }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-raised);
+  border: 1px solid var(--rule-strong);
+  color: var(--ink);
+  text-decoration: none;
+  padding: 6px 11px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-family: var(--sans);
+}
+.chip:hover { border-color: var(--accent); color: var(--accent-ink); }
+.chip .kb-tag { color: var(--ink-faint); font-family: var(--mono); font-size: 11px; }
+
+.callout {
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.65;
+  border-left: 3px solid var(--warn);
+  background: var(--warn-soft);
+  padding: 16px 20px;
+  border-radius: 0 8px 8px 0;
+  margin: 24px 0;
+  color: var(--ink);
+}
+.callout strong {
+  display: block;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--warn);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.demo {
+  margin: 32px 0 36px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--bg-panel);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.demo-header {
+  font-family: var(--sans);
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.demo-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+canvas#xform {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+  background: var(--bg-raised);
+}
+.demo-note { font-family: var(--sans); font-size: 12.5px; color: var(--ink-faint); line-height: 1.5; }
+
+.katex { font-size: 1.05em; }

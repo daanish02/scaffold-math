@@ -1,0 +1,77 @@
+---
+id: "math:linear-algebra:vectors"
+kb: "math"
+title: "Vectors"
+section: "linear-algebra"
+prerequisites: []
+related:
+  - "math:linear-algebra:matrices-as-transformations"
+  - "math:linear-algebra:abstract-vector-spaces"
+difficulty: "intro"
+status: "draft"
+hasInteractive: true
+tags: []
+description: "An arrow with length and direction, or a list of numbers - vectors as points, displacements, and the objects matrices act on."
+---
+
+import SymbolTooltip from "@daanish02/scaffold-core/components/notation/SymbolTooltip.tsx";
+import VectorViz from "../../../components/VectorViz.tsx";
+import Callout from "@daanish02/scaffold-core/components/content/Callout.astro";
+import ConceptLink from "@daanish02/scaffold-core/components/content/ConceptLink.astro";
+import SelfCheck from "@daanish02/scaffold-core/components/interactive/SelfCheck.astro";
+
+## Intuition
+
+A vector is a quantity with both size and direction - think of an arrow pointing from one point to another. You can picture it as a displacement (how far and which way to move) or as a list of numbers (how far to go along each axis). Both views describe the same object.
+
+## Visual / interactive
+
+<VectorViz client:visible initialPoint={[3, 2]} extent={6} />
+
+Drag the point to change the vector from the origin. The readout below updates live: the vector's components and its length $\lVert \vec{v} \rVert = \sqrt{v_1^2 + v_2^2}$.
+
+## Formal definition
+
+A vector{" "}
+<SymbolTooltip client:visible name="vector" pronunciation="v" meaning="an ordered list of numbers, or a magnitude-and-direction quantity">$\vec{v}$</SymbolTooltip>{" "}
+in $\mathbb{R}^n$ is an ordered tuple $(v_1, v_2, \ldots, v_n)$.
+
+**Addition** (componentwise): $\vec{u} + \vec{v} = (u_1 + v_1, \ldots, u_n + v_n)$
+
+**Scalar multiplication**: $c\vec{v} = (cv_1, \ldots, cv_n)$
+
+**Dot product**: $\vec{u} \cdot \vec{v} = \sum_{i=1}^n u_i v_i$
+
+**Norm (length)**: $\lVert \vec{v} \rVert = \sqrt{\vec{v} \cdot \vec{v}}$
+
+## Common pitfalls
+
+<Callout label="Common pitfall">
+  A vector has no fixed position - $(3, 2)$ drawn from the origin and the same arrow drawn from $(1, 1)$ to $(4, 3)$ are the same vector. Only length and direction matter.
+</Callout>
+
+<Callout label="Common pitfall">
+  The dot product returns a scalar, not a vector. Don't confuse it with the cross product (defined only in $\mathbb{R}^3$) or componentwise multiplication.
+</Callout>
+
+## Connects to
+
+<ConceptLink id="math:linear-algebra:matrices-as-transformations" />
+<ConceptLink id="math:linear-algebra:abstract-vector-spaces" />
+
+## Self-check
+
+export const questions = [
+  {
+    question: "If u = (1, 2) and v = (3, -1), what is u · v?",
+    answer: "1",
+    why: "u · v = (1)(3) + (2)(-1) = 3 - 2 = 1, summing the products of matching components.",
+  },
+  {
+    question: "Does moving a vector's starting point change the vector itself?",
+    answer: "No.",
+    why: "A vector is defined only by its length and direction, not its position - translating it leaves it unchanged.",
+  },
+];
+
+<SelfCheck questions={questions} />
