@@ -15,7 +15,7 @@ description: "An arrow with length and direction, or a list of numbers - vectors
 ---
 
 import SymbolTooltip from "@daanish02/scaffold-core/components/notation/SymbolTooltip.tsx";
-import VectorViz from "../../../components/VectorViz.tsx";
+import VectorViz from "@daanish02/scaffold-core/components/interactive/VectorViz.astro";
 import Callout from "@daanish02/scaffold-core/components/content/Callout.astro";
 import ConceptLink from "@daanish02/scaffold-core/components/content/ConceptLink.astro";
 import SelfCheck from "@daanish02/scaffold-core/components/interactive/SelfCheck.astro";
@@ -26,7 +26,7 @@ A vector is a quantity with both size and direction - think of an arrow pointing
 
 ## Visual / interactive
 
-<VectorViz client:visible initialPoint={[3, 2]} extent={6} />
+<VectorViz initialPoint={[3, 2]} extent={6} />
 
 Drag the point to change the vector from the origin. The readout below updates live: the vector's components and its length $\lVert \vec{v} \rVert = \sqrt{v_1^2 + v_2^2}$.
 
