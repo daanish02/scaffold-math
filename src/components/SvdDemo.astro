@@ -1,0 +1,128 @@
+---
+// One-off inline visual for the SVD concept page, per AUTHORING.md's
+// gap-handling guidance: no scaffold-core component supports a staged
+// rotate-scale-rotate sequence, so this stays local rather than
+// becoming a shared component until a second KB needs the same shape.
+import Demo from "@daanish02/scaffold-core/components/interactive/Demo.astro";
+---
+
+<Demo title="Interactive &middot; Singular values as an ellipse" hint="drag the sliders">
+  <canvas id="svd-canvas" width="600" height="300" aria-label="Unit circle mapped to an ellipse by singular values"></canvas>
+  <div class="slider-group">
+    <label>
+      &sigma;<sub>1</sub> (major axis) <output id="sigma1-val">1.80</output>
+    </label>
+    <input id="sigma1" type="range" min="0.2" max="2.5" step="0.05" value="1.8" />
+  </div>
+  <div class="slider-group">
+    <label>
+      &sigma;<sub>2</sub> (minor axis) <output id="sigma2-val">0.60</output>
+    </label>
+    <input id="sigma2" type="range" min="0.2" max="2.5" step="0.05" value="0.6" />
+  </div>
+  <div class="slider-group">
+    <label>
+      &theta; (orientation of U) <output id="theta-val">30&deg;</output>
+    </label>
+    <input id="theta" type="range" min="0" max="180" step="1" value="30" />
+  </div>
+</Demo>
+
+<script>
+  function setupSvdDemo() {
+    const canvas = document.getElementById("svd-canvas");
+    if (!canvas || !(canvas instanceof HTMLCanvasElement)) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const sigma1Input = document.getElementById("sigma1");
+    const sigma2Input = document.getElementById("sigma2");
+    const thetaInput = document.getElementById("theta");
+    const sigma1Val = document.getElementById("sigma1-val");
+    const sigma2Val = document.getElementById("sigma2-val");
+    const thetaVal = document.getElementById("theta-val");
+    if (
+      !(sigma1Input instanceof HTMLInputElement) ||
+      !(sigma2Input instanceof HTMLInputElement) ||
+      !(thetaInput instanceof HTMLInputElement)
+    ) {
+      return;
+    }
+
+    function cssVar(name: string): string {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#888";
+    }
+
+    function draw() {
+      const sigma1 = parseFloat(sigma1Input.value);
+      const sigma2 = parseFloat(sigma2Input.value);
+      const thetaDeg = parseFloat(thetaInput.value);
+      const theta = (thetaDeg * Math.PI) / 180;
+      if (sigma1Val) sigma1Val.textContent = sigma1.toFixed(2);
+      if (sigma2Val) sigma2Val.textContent = sigma2.toFixed(2);
+      if (thetaVal) thetaVal.textContent = thetaDeg + "°";
+
+      const W = canvas.width;
+      const H = canvas.height;
+      const cx = W / 2;
+      const cy = H / 2;
+      const scale = 50;
+
+      ctx.clearRect(0, 0, W, H);
+
+      ctx.strokeStyle = cssVar("--rule");
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, cy);
+      ctx.lineTo(W, cy);
+      ctx.moveTo(cx, 0);
+      ctx.lineTo(cx, H);
+      ctx.stroke();
+
+      ctx.strokeStyle = cssVar("--ink-soft");
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.arc(cx, cy, scale, 0, 2 * Math.PI);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const cos = Math.cos(theta);
+      const sin = Math.sin(theta);
+      ctx.strokeStyle = cssVar("--accent");
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i <= 100; i++) {
+        const t = (i / 100) * 2 * Math.PI;
+        const x0 = sigma1 * Math.cos(t);
+        const y0 = sigma2 * Math.sin(t);
+        const x = cos * x0 - sin * y0;
+        const y = sin * x0 + cos * y0;
+        const px = cx + x * scale;
+        const py = cy - y * scale;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.stroke();
+
+      ctx.strokeStyle = cssVar("--accent-ink");
+      ctx.lineWidth = 2;
+      const u1: [number, number] = [cos * sigma1, sin * sigma1];
+      const u2: [number, number] = [-sin * sigma2, cos * sigma2];
+      for (const [vx, vy] of [u1, u2]) {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + vx * scale, cy - vy * scale);
+        ctx.stroke();
+      }
+    }
+
+    sigma1Input.addEventListener("input", draw);
+    sigma2Input.addEventListener("input", draw);
+    thetaInput.addEventListener("input", draw);
+    draw();
+  }
+
+  setupSvdDemo();
+  document.addEventListener("astro:after-swap", setupSvdDemo);
+</script>

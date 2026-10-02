@@ -1,0 +1,77 @@
+---
+id: "math:linear-algebra:svd"
+kb: "math"
+title: "Singular value decomposition (SVD)"
+section: "linear-algebra"
+prerequisites:
+  - "math:linear-algebra:eigenvectors"
+  - "math:linear-algebra:qr-decomposition"
+related:
+  - "math:linear-algebra:pca"
+  - "math:linear-algebra:tensors"
+difficulty: "advanced"
+status: "draft"
+hasInteractive: true
+tags: []
+description: "Every matrix, no matter the shape, is a rotation, then a scaling along perpendicular axes, then another rotation - the most universal factorization in linear algebra."
+---
+
+import SymbolTooltip from "@daanish02/scaffold-core/components/notation/SymbolTooltip.tsx";
+import Callout from "@daanish02/scaffold-core/components/content/Callout.astro";
+import ConceptLink from "@daanish02/scaffold-core/components/content/ConceptLink.astro";
+import SelfCheck from "@daanish02/scaffold-core/components/interactive/SelfCheck.astro";
+import SvdDemo from "../../../components/SvdDemo.astro";
+
+## Intuition
+
+Every matrix - even a non-square one, even a singular one - can be broken into three simple moves: a rotation, a scaling along perpendicular axes, and another rotation. No matter how it distorts space, a matrix always sends the unit circle to an ellipse, and the SVD tells you exactly where that ellipse's axes point and how long they are. Those axis lengths, the **singular values**, measure how much the matrix stretches space in its most and least sensitive directions.
+
+## Visual / interactive
+
+<SvdDemo />
+
+The dashed circle is the input space; the solid ellipse is where the matrix sends it. The two drawn vectors are $\sigma_1 u_1$ and $\sigma_2 u_2$ - the singular values scaling the left singular vectors, which point along the ellipse's axes.
+
+## Formal definition
+
+Every $m \times n$ matrix{" "}
+<SymbolTooltip client:visible name="SVD" pronunciation="A equals U Sigma V transpose" meaning="factoring any matrix into rotation, scaling, rotation">$A = U\Sigma V^T$</SymbolTooltip>{" "}
+factors as:
+
+- $V$ ($n \times n$, orthogonal) - rotates the input space so its axes align with the directions $A$ treats specially.
+- $\Sigma$ ($m \times n$, diagonal, nonnegative, descending) - scales along those axes by the **singular values** $\sigma_1 \ge \sigma_2 \ge \cdots \ge 0$.
+- $U$ ($m \times m$, orthogonal) - rotates the result into the output space.
+
+Unlike eigendecomposition, SVD exists for *every* matrix - rectangular, singular, anything - because $U$ and $V$ are allowed to be different rotations, rather than requiring the matrix to be diagonalizable in its own basis. The singular values relate to eigenvalues via $\sigma_i = \sqrt{\lambda_i(A^TA)}$, and the columns of $V$ are the corresponding eigenvectors of $A^TA$.
+
+## Common pitfalls
+
+<Callout label="Common pitfall">
+  SVD is not the same as eigendecomposition, even for a square matrix - $U$ and $V$ can differ (and usually do, unless $A$ is symmetric positive semidefinite), while eigendecomposition reuses one basis for both "sides" of the matrix.
+</Callout>
+
+<Callout label="Common pitfall">
+  Singular values are always nonnegative, even when the matrix's eigenvalues are negative or complex - $\sigma_i$ measures a *scale factor*, which can never be negative, unlike an eigenvalue.
+</Callout>
+
+## Connects to
+
+<ConceptLink id="math:linear-algebra:pca" />
+<ConceptLink id="math:linear-algebra:tensors" />
+
+## Self-check
+
+export const questions = [
+  {
+    question: "Can every matrix, including non-square ones, be factored by SVD?",
+    answer: "Yes.",
+    why: "SVD places no restriction on shape or invertibility - U and V are allowed to be different orthogonal matrices, unlike eigendecomposition which needs a single shared basis.",
+  },
+  {
+    question: "What does the largest singular value sigma_1 tell you about a matrix?",
+    answer: "The most a unit vector can be stretched by the matrix, in any direction.",
+    why: "Sigma_1 is the length of the ellipse's longest axis - the maximum possible ratio of ||Av|| to ||v|| over all nonzero v.",
+  },
+];
+
+<SelfCheck questions={questions} />
