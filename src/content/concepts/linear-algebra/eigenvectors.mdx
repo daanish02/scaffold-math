@@ -1,0 +1,94 @@
+---
+id: "math:linear-algebra:eigenvectors"
+kb: "math"
+title: "Eigenvectors & eigenvalues"
+section: "linear-algebra"
+prerequisites:
+  - "math:linear-algebra:matrices-as-transformations"
+  - "math:linear-algebra:determinants"
+related:
+  - "math:linear-algebra:svd"
+  - "math:linear-algebra:pca"
+  - "math:linear-algebra:tensors"
+difficulty: "core"
+status: "draft"
+hasInteractive: true
+tags: []
+description: "The directions a matrix leaves unrotated, only stretched or shrunk by a fixed factor - the key to understanding what a matrix does."
+---
+
+import SymbolTooltip from "@daanish02/scaffold-core/components/notation/SymbolTooltip.tsx";
+import CodeCell from "@daanish02/scaffold-core/components/content/CodeCell.astro";
+import TransformViz from "@daanish02/scaffold-core/components/interactive/TransformViz.astro";
+import Callout from "@daanish02/scaffold-core/components/content/Callout.astro";
+import ConceptLink from "@daanish02/scaffold-core/components/content/ConceptLink.astro";
+import SelfCheck from "@daanish02/scaffold-core/components/interactive/SelfCheck.astro";
+
+## Intuition
+
+A 2x2 matrix can be read as an instruction for moving every point in the plane at once - stretching, squashing, rotating, or flipping space. Some directions survive this move unchanged in orientation, only scaled: those are the interesting ones. An eigenvector points along one of those surviving directions, and its eigenvalue is how much it gets stretched or shrunk.
+
+## Visual / interactive
+
+export const initialMatrix = { a: 2, b: 0, c: 0, d: 1 };
+
+<TransformViz initial={initialMatrix} />
+
+As you drag the sliders, watch for the directions where the grid lines don't rotate - only lengthen or shorten. Those are the eigenvector directions of the current matrix.
+
+## Formal definition
+
+For a square matrix{" "}
+<SymbolTooltip client:visible name="matrix" pronunciation="A" meaning="a square array of numbers representing a linear map">$A$</SymbolTooltip>{" "}
+, a nonzero vector{" "}
+<SymbolTooltip client:visible name="eigenvector" pronunciation="v" meaning="a direction left unrotated by A, only scaled">$v$</SymbolTooltip>{" "}
+is an **eigenvector** with **eigenvalue**{" "}
+<SymbolTooltip client:visible name="eigenvalue" pronunciation="lambda" meaning="the scale factor applied along an eigenvector's direction">$\lambda$</SymbolTooltip>{" "}
+if:
+
+$$
+Av = \lambda v
+$$
+
+For a 2x2 matrix, eigenvalues solve the characteristic equation $\lambda^2 - (a+d)\lambda + (ad - bc) = 0$ - equivalently, $\det(A - \lambda I) = 0$.
+
+export const sampleCode = `import numpy as np
+
+A = np.array([[2, 0], [0, 1]])
+values, vectors = np.linalg.eig(A)
+print(values)`;
+
+<CodeCell lang="python">{sampleCode}</CodeCell>
+
+## Common pitfalls
+
+<Callout label="Common pitfall">
+  Not every real matrix has real eigenvectors - a rotation matrix, for example, has none (its eigenvalues are complex), since rotation doesn't leave any real direction unrotated.
+</Callout>
+
+<Callout label="Common pitfall">
+  Eigenvectors are only defined up to scale - any nonzero multiple of an eigenvector is also an eigenvector for the same eigenvalue. There's no single "the" eigenvector for a given eigenvalue, only a line of them.
+</Callout>
+
+## Connects to
+
+<ConceptLink id="math:linear-algebra:svd" />
+<ConceptLink id="math:linear-algebra:pca" />
+<ConceptLink id="math:linear-algebra:tensors" />
+
+## Self-check
+
+export const questions = [
+  {
+    question: "If Av = 3v for some nonzero v, what is the eigenvalue?",
+    answer: "3",
+    why: "The scalar multiplying v on the right-hand side of Av = λv is the eigenvalue by definition.",
+  },
+  {
+    question: "Can a matrix have more eigenvectors than its dimension allows as independent directions?",
+    answer: "No - an nxn matrix has at most n linearly independent eigenvectors.",
+    why: "Eigenvectors for distinct eigenvalues are linearly independent, and the vector space only has n dimensions.",
+  },
+];
+
+<SelfCheck questions={questions} />
