@@ -1,0 +1,81 @@
+---
+id: "math:linear-algebra:lu-decomposition"
+kb: "math"
+title: "LU decomposition"
+section: "linear-algebra"
+prerequisites:
+  - "math:linear-algebra:systems-of-equations"
+related:
+  - "math:linear-algebra:qr-decomposition"
+difficulty: "core"
+status: "draft"
+hasInteractive: true
+tags: []
+description: "Splitting a matrix into a lower-triangular and upper-triangular factor - packaging the bookkeeping of Gaussian elimination so the same elimination work can be reused across many right-hand sides."
+---
+
+import SymbolTooltip from "@daanish02/scaffold-core/components/notation/SymbolTooltip.tsx";
+import StepThrough from "@daanish02/scaffold-core/components/interactive/StepThrough.astro";
+import Callout from "@daanish02/scaffold-core/components/content/Callout.astro";
+import ConceptLink from "@daanish02/scaffold-core/components/content/ConceptLink.astro";
+import SelfCheck from "@daanish02/scaffold-core/components/interactive/SelfCheck.astro";
+
+## Intuition
+
+LU decomposition packages Gaussian elimination into two triangular matrices: $L$ (lower-triangular, recording the row-elimination multipliers) and $U$ (upper-triangular, the result of elimination). Once you have $A = LU$, solving $Ax = b$ for many different $b$'s becomes cheap - you only redo two easy triangular solves each time, instead of re-running elimination from scratch.
+
+## Visual / interactive
+
+export const steps = [
+  "Start with A = [[2, 1], [4, 3]]. Eliminate the entry below the pivot: row 2 minus 2x row 1 clears the (2,1) position, using multiplier 2.",
+  "That elimination step produces U = [[2, 1], [0, 1]] - the upper-triangular result after forward elimination.",
+  "The multiplier used (2) becomes the (2,1) entry of L, with 1's on the diagonal: L = [[1, 0], [2, 1]].",
+  "Check: L times U reconstructs A exactly - [[1,0],[2,1]] times [[2,1],[0,1]] gives back [[2,1],[4,3]].",
+];
+
+<StepThrough steps={steps} />
+
+## Formal definition
+
+For a square matrix{" "}
+<SymbolTooltip client:visible name="LU decomposition" pronunciation="A equals L U" meaning="factoring A into a lower-triangular L and upper-triangular U">$A = LU$</SymbolTooltip>{" "}
+, $L$ is lower-triangular with 1's on the diagonal and $U$ is upper-triangular, obtained by recording the row multipliers used during Gaussian elimination.
+
+Once factored, solving $Ax = b$ becomes two triangular solves:
+
+$$
+Ly = b \quad \text{(forward substitution)}, \qquad Ux = y \quad \text{(back substitution)}
+$$
+
+Each triangular solve costs $O(n^2)$ instead of the $O(n^3)$ cost of elimination - so factoring once and solving for many $b$'s is far cheaper than re-eliminating each time.
+
+## Common pitfalls
+
+<Callout label="Common pitfall">
+  Not every matrix has a plain LU decomposition - a zero pivot can force a row swap, which needs a permutation matrix $P$, giving $PA = LU$ instead. Most practical LU solvers include this pivoting by default.
+</Callout>
+
+<Callout label="Common pitfall">
+  Factoring $A = LU$ once doesn't help if $A$ itself changes between solves - the cost savings only apply across multiple right-hand sides $b$ for the *same* $A$.
+</Callout>
+
+## Connects to
+
+<ConceptLink id="math:linear-algebra:qr-decomposition" />
+
+## Self-check
+
+export const questions = [
+  {
+    question: "Why bother factoring A = LU instead of just running elimination directly on Ax = b?",
+    answer: "Because once factored, solving for a new b only costs two cheap triangular solves, not a full re-elimination.",
+    why: "L and U capture all the elimination work done on A; applying that work to a new b via forward/back substitution is much cheaper than starting elimination over.",
+  },
+  {
+    question: "What shape does L always have on its diagonal?",
+    answer: "1's.",
+    why: "By convention, L is normalized to have unit diagonal entries, so the multipliers from elimination are recorded uniquely below the diagonal.",
+  },
+];
+
+<SelfCheck questions={questions} />
