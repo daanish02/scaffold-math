@@ -1,0 +1,82 @@
+---
+id: "math:linear-algebra:qr-decomposition"
+kb: "math"
+title: "QR decomposition"
+section: "linear-algebra"
+prerequisites:
+  - "math:linear-algebra:orthogonality"
+  - "math:linear-algebra:projections"
+related:
+  - "math:linear-algebra:svd"
+difficulty: "core"
+status: "draft"
+hasInteractive: true
+tags: []
+description: "Replacing a matrix's columns with an orthonormal basis for the same space, plus a record of how to get back - the Gram-Schmidt process made algebraic."
+---
+
+import SymbolTooltip from "@daanish02/scaffold-core/components/notation/SymbolTooltip.tsx";
+import StepThrough from "@daanish02/scaffold-core/components/interactive/StepThrough.astro";
+import Callout from "@daanish02/scaffold-core/components/content/Callout.astro";
+import ConceptLink from "@daanish02/scaffold-core/components/content/ConceptLink.astro";
+import SelfCheck from "@daanish02/scaffold-core/components/interactive/SelfCheck.astro";
+
+## Intuition
+
+QR decomposition replaces a matrix's columns with an orthonormal basis $Q$ that spans the same space, plus an upper-triangular matrix $R$ recording how to rebuild the original columns from that basis. It's the algebraic form of the Gram-Schmidt process: straighten out a set of vectors into mutually perpendicular, unit-length directions, one at a time, without changing what they span.
+
+## Visual / interactive
+
+export const steps = [
+  "Start with two columns a1 = (3, 4) and a2 = (1, 0) that span a plane.",
+  "Normalize the first: q1 = a1 / ||a1|| = (0.6, 0.8). This is the first column of Q.",
+  "Subtract from a2 its projection onto q1, removing the part of a2 already covered by q1: a2 - (q1.a2) q1 = (1, 0) - 0.6(0.6, 0.8) = (0.64, -0.48).",
+  "Normalize that residual to get q2 = (0.8, -0.6) - orthogonal to q1 by construction. Q = [q1 q2] is now orthonormal, and R records the projection coefficients used to rebuild a1 and a2 from q1 and q2.",
+];
+
+<StepThrough steps={steps} />
+
+## Formal definition
+
+For a matrix{" "}
+<SymbolTooltip client:visible name="QR decomposition" pronunciation="A equals Q R" meaning="factoring A into an orthonormal Q and upper-triangular R">$A = QR$</SymbolTooltip>{" "}
+with independent columns, $Q$ has orthonormal columns and $R$ is upper-triangular with positive diagonal entries.
+
+**Gram-Schmidt** builds $Q$ one column at a time: normalize the first column, then for each subsequent column, subtract off its projections onto all previously built $q_i$'s before normalizing:
+
+$$
+q_k = \frac{a_k - \sum_{i<k} (q_i \cdot a_k)\, q_i}{\left\lVert a_k - \sum_{i<k} (q_i \cdot a_k)\, q_i \right\rVert}
+$$
+
+$R$'s entries are exactly those projection coefficients: $R_{ik} = q_i \cdot a_k$ for $i \le k$.
+
+## Common pitfalls
+
+<Callout label="Common pitfall">
+  Classical Gram-Schmidt is numerically unstable in floating point - columns that are nearly dependent can lose orthogonality after rounding error accumulates. Practical implementations use modified Gram-Schmidt or Householder reflections instead.
+</Callout>
+
+<Callout label="Common pitfall">
+  QR decomposition requires the columns of $A$ to be linearly independent to produce a full-rank $Q$ - if a column is a combination of earlier ones, Gram-Schmidt subtracts it down to the zero vector and normalizing breaks down.
+</Callout>
+
+## Connects to
+
+<ConceptLink id="math:linear-algebra:svd" />
+
+## Self-check
+
+export const questions = [
+  {
+    question: "What property do the columns of Q always have?",
+    answer: "They're orthonormal - mutually perpendicular and unit length.",
+    why: "QR decomposition is built precisely to replace A's columns with an orthonormal basis spanning the same space.",
+  },
+  {
+    question: "What does entry R_12 represent in Gram-Schmidt terms?",
+    answer: "The projection of the second column a2 onto the first orthonormal vector q1.",
+    why: "R's off-diagonal entries record exactly the projection coefficients subtracted off during Gram-Schmidt, so that QR reconstructs A.",
+  },
+];
+
+<SelfCheck questions={questions} />
