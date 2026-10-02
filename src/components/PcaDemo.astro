@@ -1,0 +1,185 @@
+---
+// One-off inline visual for the PCA concept page, per AUTHORING.md's
+// gap-handling guidance: no scaffold-core component computes variance
+// axes over a draggable point cloud, so this stays local rather than
+// becoming a shared component until a second KB needs the same shape.
+import Demo from "@daanish02/scaffold-core/components/interactive/Demo.astro";
+---
+
+<Demo title="Interactive &middot; Principal axes of a point cloud" hint="drag any point">
+  <canvas id="pca-canvas" width="600" height="320" aria-label="Point cloud with computed principal axes"></canvas>
+</Demo>
+
+<script>
+  function setupPcaDemo() {
+    const canvas = document.getElementById("pca-canvas");
+    if (!canvas || !(canvas instanceof HTMLCanvasElement)) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const scale = 30;
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+
+    function toScreen(p: [number, number]): [number, number] {
+      return [cx + p[0] * scale, cy - p[1] * scale];
+    }
+    function toData(sx: number, sy: number): [number, number] {
+      return [(sx - cx) / scale, (cy - sy) / scale];
+    }
+
+    let points: [number, number][] = [
+      [-3, -1.5],
+      [-2, -0.8],
+      [-1.5, -1.2],
+      [-1, 0.2],
+      [0, 0.5],
+      [0.5, -0.3],
+      [1.5, 1.2],
+      [2, 0.6],
+      [2.5, 1.8],
+      [3, 1.1],
+    ];
+    let dragIndex = -1;
+
+    function cssVar(name: string): string {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#888";
+    }
+
+    function mean(pts: [number, number][]): [number, number] {
+      const n = pts.length;
+      const sx = pts.reduce((s, p) => s + p[0], 0);
+      const sy = pts.reduce((s, p) => s + p[1], 0);
+      return [sx / n, sy / n];
+    }
+
+    // Eigen-decomposition of the 2x2 covariance matrix - same closed form
+    // as TransformViz's eigen2x2, applied to variance/covariance instead
+    // of a transformation matrix.
+    function principalAxes(pts: [number, number][]) {
+      const [mx, my] = mean(pts);
+      const n = pts.length;
+      let cxx = 0,
+        cyy = 0,
+        cxy = 0;
+      for (const [x, y] of pts) {
+        const dx = x - mx;
+        const dy = y - my;
+        cxx += dx * dx;
+        cyy += dy * dy;
+        cxy += dx * dy;
+      }
+      cxx /= n - 1;
+      cyy /= n - 1;
+      cxy /= n - 1;
+
+      const tr = cxx + cyy;
+      const det = cxx * cyy - cxy * cxy;
+      const disc = Math.max(tr * tr - 4 * det, 0);
+      const sq = Math.sqrt(disc);
+      const l1 = (tr + sq) / 2;
+      const l2 = (tr - sq) / 2;
+
+      function eigenvectorFor(lambda: number): [number, number] {
+        if (Math.abs(cxy) > 1e-9) {
+          const vx = lambda - cyy;
+          const vy = cxy;
+          const len = Math.hypot(vx, vy) || 1;
+          return [vx / len, vy / len];
+        }
+        return cxx >= cyy ? [1, 0] : [0, 1];
+      }
+
+      return {
+        mean: [mx, my] as [number, number],
+        l1,
+        l2,
+        v1: eigenvectorFor(l1),
+        v2: eigenvectorFor(l2),
+      };
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = cssVar("--rule");
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, cy);
+      ctx.lineTo(canvas.width, cy);
+      ctx.moveTo(cx, 0);
+      ctx.lineTo(cx, canvas.height);
+      ctx.stroke();
+
+      const { mean: m, l1, l2, v1, v2 } = principalAxes(points);
+      const [msx, msy] = toScreen(m);
+
+      // principal axes, scaled by one standard deviation along each
+      ctx.strokeStyle = cssVar("--accent");
+      ctx.lineWidth = 2;
+      for (const [lambda, v] of [
+        [l1, v1],
+        [l2, v2],
+      ] as [number, [number, number]][]) {
+        const sd = Math.sqrt(Math.max(lambda, 0));
+        const [ex, ey] = toScreen([m[0] + v[0] * sd, m[1] + v[1] * sd]);
+        ctx.beginPath();
+        ctx.moveTo(msx, msy);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+      }
+
+      // the points themselves
+      ctx.fillStyle = cssVar("--accent-ink");
+      for (const p of points) {
+        const [sx, sy] = toScreen(p);
+        ctx.beginPath();
+        ctx.arc(sx, sy, 5, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      // centroid
+      ctx.fillStyle = cssVar("--ink-soft");
+      ctx.beginPath();
+      ctx.arc(msx, msy, 3, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+
+    function nearestPointIndex(sx: number, sy: number): number {
+      let best = -1;
+      let bestDist = 12;
+      points.forEach((p, i) => {
+        const [px, py] = toScreen(p);
+        const d = Math.hypot(px - sx, py - sy);
+        if (d < bestDist) {
+          bestDist = d;
+          best = i;
+        }
+      });
+      return best;
+    }
+
+    canvas.addEventListener("pointerdown", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const sx = ((e.clientX - rect.left) / rect.width) * canvas.width;
+      const sy = ((e.clientY - rect.top) / rect.height) * canvas.height;
+      dragIndex = nearestPointIndex(sx, sy);
+    });
+    canvas.addEventListener("pointermove", (e) => {
+      if (dragIndex < 0) return;
+      const rect = canvas.getBoundingClientRect();
+      const sx = ((e.clientX - rect.left) / rect.width) * canvas.width;
+      const sy = ((e.clientY - rect.top) / rect.height) * canvas.height;
+      points = points.map((p, i) => (i === dragIndex ? toData(sx, sy) : p));
+      draw();
+    });
+    window.addEventListener("pointerup", () => {
+      dragIndex = -1;
+    });
+
+    draw();
+  }
+
+  setupPcaDemo();
+  document.addEventListener("astro:after-swap", setupPcaDemo);
+</script>

@@ -1,0 +1,75 @@
+---
+id: "math:linear-algebra:pca"
+kb: "math"
+title: "Principal component analysis (PCA)"
+section: "linear-algebra"
+prerequisites:
+  - "math:linear-algebra:svd"
+related: []
+difficulty: "advanced"
+status: "draft"
+hasInteractive: true
+tags: []
+description: "Finding the directions along which a cloud of data varies the most - by computing the eigenvectors of its covariance matrix."
+---
+
+import SymbolTooltip from "@daanish02/scaffold-core/components/notation/SymbolTooltip.tsx";
+import Callout from "@daanish02/scaffold-core/components/content/Callout.astro";
+import ConceptLink from "@daanish02/scaffold-core/components/content/ConceptLink.astro";
+import SelfCheck from "@daanish02/scaffold-core/components/interactive/SelfCheck.astro";
+import PcaDemo from "../../../components/PcaDemo.astro";
+
+## Intuition
+
+Given a cloud of data points, PCA finds the directions along which the cloud spreads out the most. The first principal axis is the direction of greatest variance; the second is the direction of next-greatest variance, perpendicular to the first; and so on. Rewriting the data in terms of these axes is a change of basis that puts the "important" directions first - useful for compressing data, visualizing it, or removing noise concentrated in low-variance directions.
+
+## Visual / interactive
+
+<PcaDemo />
+
+Drag any point and watch the two axes update. The longer axis points along the direction of greatest spread; its length reflects how much variance lies along it. The axes are always perpendicular to each other, no matter how the points are arranged.
+
+## Formal definition
+
+Given data points centered at their mean, the{" "}
+<SymbolTooltip client:visible name="covariance matrix" pronunciation="C" meaning="a matrix summarizing how each pair of dimensions varies together">$C$</SymbolTooltip>{" "}
+summarizes how each pair of dimensions varies together:
+
+$$
+C = \frac{1}{n-1}\sum_{i=1}^n (x_i - \bar{x})(x_i - \bar{x})^T
+$$
+
+The **principal components** are the eigenvectors of $C$, ordered by eigenvalue. Each eigenvalue equals the variance of the data along its corresponding eigenvector's direction - the largest eigenvalue's eigenvector is the first principal component.
+
+This connects directly to the SVD: if $X$ is the centered data matrix (one row per point), then $C = \frac{1}{n-1}X^TX$, and the principal components are exactly the right singular vectors of $X$. Running PCA via SVD on $X$ directly is more numerically stable than forming $C$ and eigendecomposing it.
+
+## Common pitfalls
+
+<Callout label="Common pitfall">
+  PCA is sensitive to the scale of each dimension - a variable measured in millimeters will dominate the variance (and the first principal component) over the same quantity measured in meters, purely from the unit choice. Standardize each dimension first unless the units are already comparable.
+</Callout>
+
+<Callout label="Common pitfall">
+  A principal component is a direction, not a subset of the original variables - "dropping" lower components to reduce dimensionality means projecting onto a subspace, not deleting original features.
+</Callout>
+
+## Connects to
+
+<ConceptLink id="math:linear-algebra:svd" />
+
+## Self-check
+
+export const questions = [
+  {
+    question: "What determines which eigenvector of the covariance matrix is the 'first' principal component?",
+    answer: "It has the largest eigenvalue.",
+    why: "Each eigenvalue of the covariance matrix equals the variance along its eigenvector's direction, so the largest eigenvalue marks the direction of greatest spread.",
+  },
+  {
+    question: "Why might PCA give misleading results if one feature is in kilometers and another is in millimeters, with no standardization?",
+    answer: "The millimeter feature would dominate the variance purely due to its larger numeric scale, skewing the principal axes toward it.",
+    why: "PCA operates on numeric variance, which is unit-dependent - rescaling a variable changes its variance without changing what it measures, so unstandardized units can distort which directions look 'important.'",
+  },
+];
+
+<SelfCheck questions={questions} />
