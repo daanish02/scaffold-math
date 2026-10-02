@@ -1,0 +1,83 @@
+---
+id: "math:linear-algebra:determinants"
+kb: "math"
+title: "Determinants"
+section: "linear-algebra"
+prerequisites:
+  - "math:linear-algebra:systems-of-equations"
+related:
+  - "math:linear-algebra:eigenvectors"
+difficulty: "core"
+status: "draft"
+hasInteractive: true
+tags: []
+description: "A single number measuring how much a matrix scales area or volume - and whether it flips orientation or collapses a dimension."
+---
+
+import SymbolTooltip from "@daanish02/scaffold-core/components/notation/SymbolTooltip.tsx";
+import TransformViz from "@daanish02/scaffold-core/components/interactive/TransformViz.astro";
+import Callout from "@daanish02/scaffold-core/components/content/Callout.astro";
+import ConceptLink from "@daanish02/scaffold-core/components/content/ConceptLink.astro";
+import SelfCheck from "@daanish02/scaffold-core/components/interactive/SelfCheck.astro";
+
+## Intuition
+
+The determinant is a single number that tells you how a matrix scales area (in 2D) or volume (in 3D and beyond). A unit square has area 1; after applying a matrix $A$, it becomes a parallelogram with area $|\det A|$. If the determinant is negative, the transformation also flips orientation (like a mirror). If it's zero, the transformation squashes the plane down to a line or point - information is lost and the matrix can't be undone.
+
+## Visual / interactive
+
+export const initialMatrix = { a: 2, b: 1, c: 0, d: 1 };
+
+<TransformViz initial={initialMatrix} />
+
+Watch the grid squares warp into parallelograms as you drag the sliders. The determinant
+
+$$
+\det A = ad - bc
+$$
+
+updates live - it's exactly the signed area of the parallelogram the unit square becomes. Try setting it to zero and see the grid flatten into a line.
+
+## Formal definition
+
+For a $2\times2$ matrix{" "}
+<SymbolTooltip client:visible name="determinant" pronunciation="det A" meaning="signed scale factor a matrix applies to area or volume">$\det A$</SymbolTooltip>{" "}
+, $\det \begin{bmatrix} a & b \\ c & d \end{bmatrix} = ad - bc$. For larger matrices, the determinant is defined recursively by cofactor expansion along any row or column.
+
+**Key properties**:
+
+- $\det A = 0$ if and only if $A$ is singular (not invertible) - its columns are linearly dependent.
+- $\det(AB) = \det(A)\det(B)$ - scale factors multiply when transformations compose.
+- $\det(A^{-1}) = 1/\det(A)$, since undoing a transformation undoes its scale factor too.
+- Swapping two rows flips the sign of the determinant.
+
+## Common pitfalls
+
+<Callout label="Common pitfall">
+  A zero determinant means "not invertible," not "the zero matrix." Plenty of nonzero matrices have determinant zero - any matrix whose columns are linearly dependent, like [[1,2],[2,4]].
+</Callout>
+
+<Callout label="Common pitfall">
+  $\det(A + B) \neq \det A + \det B$ in general - the determinant is not linear over matrix addition, only multiplicative over matrix products.
+</Callout>
+
+## Connects to
+
+<ConceptLink id="math:linear-algebra:eigenvectors" />
+
+## Self-check
+
+export const questions = [
+  {
+    question: "A 2x2 matrix has determinant 0. Can it be inverted?",
+    answer: "No.",
+    why: "A zero determinant means the matrix collapses the plane to a lower dimension, losing information that can't be recovered - exactly the condition for non-invertibility.",
+  },
+  {
+    question: "If det(A) = 3 and det(B) = 2, what is det(AB)?",
+    answer: "6",
+    why: "Determinants multiply under matrix composition: det(AB) = det(A)*det(B).",
+  },
+];
+
+<SelfCheck questions={questions} />
