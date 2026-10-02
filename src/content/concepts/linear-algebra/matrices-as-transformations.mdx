@@ -1,0 +1,88 @@
+---
+id: "math:linear-algebra:matrices-as-transformations"
+kb: "math"
+title: "Matrices as transformations"
+section: "linear-algebra"
+prerequisites:
+  - "math:linear-algebra:vectors"
+related:
+  - "math:linear-algebra:systems-of-equations"
+  - "math:linear-algebra:eigenvectors"
+  - "math:linear-algebra:determinants"
+difficulty: "intro"
+status: "draft"
+hasInteractive: true
+tags: []
+description: "A matrix as an instruction for moving every point in the plane at once - the lens that makes the rest of linear algebra visual."
+---
+
+import SymbolTooltip from "@daanish02/scaffold-core/components/notation/SymbolTooltip.tsx";
+import TransformViz from "@daanish02/scaffold-core/components/interactive/TransformViz.astro";
+import Callout from "@daanish02/scaffold-core/components/content/Callout.astro";
+import ConceptLink from "@daanish02/scaffold-core/components/content/ConceptLink.astro";
+import SelfCheck from "@daanish02/scaffold-core/components/interactive/SelfCheck.astro";
+
+## Intuition
+
+A matrix isn't just a grid of numbers - it's an instruction for moving every point in the plane at once. Feed it a vector, and it hands back a new vector: stretched, squashed, rotated, or flipped. Multiplying a matrix by a vector is applying that move to a single point; multiplying two matrices is chaining two moves into one.
+
+## Visual / interactive
+
+export const initialMatrix = { a: 1.5, b: 0, c: 0, d: 1 };
+
+<TransformViz initial={initialMatrix} />
+
+As you drag the sliders, the grid warps to show where every point lands. The matrix
+
+$$
+A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}
+$$
+
+updates live - watch $a$ and $d$ stretch along the axes, while $b$ and $c$ shear.
+
+## Formal definition
+
+A matrix{" "}
+<SymbolTooltip client:visible name="matrix" pronunciation="A" meaning="a rectangular array of numbers representing a linear map">$A$</SymbolTooltip>{" "}
+of size $m \times n$ maps vectors in $\mathbb{R}^n$ to vectors in $\mathbb{R}^m$ by:
+
+$$
+(Av)_i = \sum_{j=1}^n A_{ij} v_j
+$$
+
+This map is **linear**: $A(u + v) = Au + Av$ and $A(cv) = cA(v)$ for any scalar $c$. In fact every linear map between finite-dimensional vector spaces can be written as matrix multiplication once a basis is fixed - matrices and linear maps are the same object viewed two ways.
+
+**Composition**: applying $A$ then $B$ to a vector equals applying the single matrix $BA$ - matrix multiplication is defined exactly so that $(BA)v = B(Av)$.
+
+## Common pitfalls
+
+<Callout label="Common pitfall">
+  Matrix multiplication doesn't commute: $AB \neq BA$ in general. Order matters because it encodes *which transformation happens first* - applying a rotation then a shear is a different move than shear-then-rotation.
+</Callout>
+
+<Callout label="Common pitfall">
+  $A$ and $v$ must have compatible shapes: an $m \times n$ matrix only acts on vectors in $\mathbb{R}^n$. "Multiplying" a $2\times2$ matrix by a 3-vector isn't a smaller version of the same operation - it's undefined.
+</Callout>
+
+## Connects to
+
+<ConceptLink id="math:linear-algebra:systems-of-equations" />
+<ConceptLink id="math:linear-algebra:eigenvectors" />
+<ConceptLink id="math:linear-algebra:determinants" />
+
+## Self-check
+
+export const questions = [
+  {
+    question: "If A stretches the x-axis by 2 and leaves the y-axis alone, what does A = [[a,b],[c,d]] look like?",
+    answer: "a=2, b=0, c=0, d=1",
+    why: "Each column of A is where the corresponding basis vector lands - the first column (a, c) is where (1,0) goes, so it becomes (2, 0).",
+  },
+  {
+    question: "Does applying transformation A then B give the same result as applying B then A?",
+    answer: "Not in general.",
+    why: "Matrix multiplication is non-commutative - BA composes 'A first, then B', which is a different map from AB unless A and B happen to commute.",
+  },
+];
+
+<SelfCheck questions={questions} />
