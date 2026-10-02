@@ -1,0 +1,83 @@
+---
+id: "math:linear-algebra:systems-of-equations"
+kb: "math"
+title: "Systems of linear equations"
+section: "linear-algebra"
+prerequisites:
+  - "math:linear-algebra:matrices-as-transformations"
+related:
+  - "math:linear-algebra:determinants"
+  - "math:linear-algebra:lu-decomposition"
+difficulty: "core"
+status: "draft"
+hasInteractive: true
+tags: []
+description: "Solving Ax = b as finding where lines (or planes) intersect, and as undoing a matrix transformation - two views of the same problem."
+---
+
+import SymbolTooltip from "@daanish02/scaffold-core/components/notation/SymbolTooltip.tsx";
+import StepThrough from "@daanish02/scaffold-core/components/interactive/StepThrough.astro";
+import Callout from "@daanish02/scaffold-core/components/content/Callout.astro";
+import ConceptLink from "@daanish02/scaffold-core/components/content/ConceptLink.astro";
+import SelfCheck from "@daanish02/scaffold-core/components/interactive/SelfCheck.astro";
+
+## Intuition
+
+A system of linear equations asks: where do these lines (or planes, in higher dimensions) all cross at once? Each equation draws one line; the solution is the point every line agrees on. Written as $Ax = b$, the same question becomes "which input $x$ does $A$ send to $b$?" - solving the system is undoing the transformation.
+
+## Visual / interactive
+
+export const steps = [
+  "Start with the system 2x + y = 5, x + 3y = 10 - as an augmented matrix, [2 1 | 5] over [1 3 | 10].",
+  "Eliminate x from row 2 by subtracting (1/2)×row 1 from row 2: [2 1 | 5] over [0 2.5 | 7.5].",
+  "Row 2 now reads 2.5y = 7.5, so y = 3. Back-substitute into row 1: 2x + 3 = 5, so x = 1.",
+  "Check: the two original lines 2x + y = 5 and x + 3y = 10 cross at exactly (1, 3) - the unique solution.",
+];
+
+<StepThrough steps={steps} />
+
+## Formal definition
+
+A system of $m$ linear equations in $n$ unknowns is written compactly as{" "}
+<SymbolTooltip client:visible name="linear system" pronunciation="A x equals b" meaning="matrix equation encoding m equations in n unknowns">$Ax = b$</SymbolTooltip>{" "}
+, where $A$ is $m \times n$, $x \in \mathbb{R}^n$ is the unknown vector, and $b \in \mathbb{R}^m$.
+
+**Gaussian elimination** reduces $A$ to row-echelon form via row operations (swap, scale, add a multiple of one row to another) that preserve the solution set, then back-substitutes to recover $x$.
+
+A system has exactly one of three outcomes:
+
+- **Unique solution** - the rows of $A$ are independent and span enough directions to pin down one point.
+- **No solution** - the equations are inconsistent (e.g. two parallel lines that never meet).
+- **Infinitely many solutions** - the equations are redundant, leaving a free direction (e.g. two equations describing the same line).
+
+## Common pitfalls
+
+<Callout label="Common pitfall">
+  "No solution" and "infinitely many solutions" both come from rows becoming all-zero during elimination - the difference is whether the corresponding entry in $b$ is also zero. All-zero row with nonzero $b$-entry means inconsistent; all-zero row with zero $b$-entry means a free variable.
+</Callout>
+
+<Callout label="Common pitfall">
+  More equations than unknowns doesn't guarantee a unique solution, and fewer doesn't guarantee infinitely many - what matters is the rank of $A$, not just its shape.
+</Callout>
+
+## Connects to
+
+<ConceptLink id="math:linear-algebra:determinants" />
+<ConceptLink id="math:linear-algebra:lu-decomposition" />
+
+## Self-check
+
+export const questions = [
+  {
+    question: "If elimination produces a row of all zeros on the left with a nonzero value on the right (e.g. 0 = 4), what does that mean?",
+    answer: "The system has no solution.",
+    why: "A row that says '0 = 4' is a contradiction - no values of the unknowns can satisfy it, so the whole system is inconsistent.",
+  },
+  {
+    question: "Two equations describe the same line. How many solutions does the system have?",
+    answer: "Infinitely many.",
+    why: "Every point on the shared line satisfies both equations, so the solution set is the entire line, not a single point.",
+  },
+];
+
+<SelfCheck questions={questions} />
