@@ -1,0 +1,78 @@
+---
+id: "math:linear-algebra:projections"
+kb: "math"
+title: "Projections"
+section: "linear-algebra"
+prerequisites:
+  - "math:linear-algebra:orthogonality"
+related:
+  - "math:linear-algebra:qr-decomposition"
+  - "math:linear-algebra:pca"
+difficulty: "core"
+status: "draft"
+hasInteractive: true
+tags: []
+description: "Casting a vector's shadow onto a line or subspace - the closest point on that subspace to the original vector."
+---
+
+import SymbolTooltip from "@daanish02/scaffold-core/components/notation/SymbolTooltip.tsx";
+import DraggableGeometry from "@daanish02/scaffold-core/components/interactive/DraggableGeometry.astro";
+import Callout from "@daanish02/scaffold-core/components/content/Callout.astro";
+import ConceptLink from "@daanish02/scaffold-core/components/content/ConceptLink.astro";
+import SelfCheck from "@daanish02/scaffold-core/components/interactive/SelfCheck.astro";
+
+## Intuition
+
+A projection casts a vector's shadow onto a line or plane, as if a light were shining straight down perpendicular to that subspace. The shadow is the closest point on the subspace to the original vector - projecting is how you find "the best approximation of v that lives on this line."
+
+## Visual / interactive
+
+<DraggableGeometry initialPoints={[[4, 3], [5, 0]]} extent={6} />
+
+Picture the first point as a vector $\vec{v}$, and the second as spanning a line through the origin. The projection of $\vec{v}$ onto that line is the point on the line closest to $\vec{v}$ - found by dropping a perpendicular from $\vec{v}$ down to the line. Drag either point and imagine how that foot of the perpendicular moves.
+
+## Formal definition
+
+The{" "}
+<SymbolTooltip client:visible name="projection" pronunciation="proj sub u of v" meaning="the closest point to v lying on the line spanned by u">$\operatorname{proj}_{\vec{u}}(\vec{v})$</SymbolTooltip>{" "}
+of $\vec{v}$ onto the line spanned by $\vec{u}$ is:
+
+$$
+\operatorname{proj}_{\vec{u}}(\vec{v}) = \frac{\vec{u} \cdot \vec{v}}{\vec{u} \cdot \vec{u}} \, \vec{u}
+$$
+
+The **residual** $\vec{v} - \operatorname{proj}_{\vec{u}}(\vec{v})$ is always orthogonal to $\vec{u}$ - that perpendicularity is exactly what makes the projection the *closest* point on the line, not just some point on it.
+
+This generalizes to projecting onto a higher-dimensional subspace spanned by an orthonormal basis $\{\vec{e}_1, \ldots, \vec{e}_k\}$: sum the projections onto each basis vector, $\sum_i (\vec{e}_i \cdot \vec{v})\,\vec{e}_i$.
+
+## Common pitfalls
+
+<Callout label="Common pitfall">
+  The subspace-projection formula $\sum_i (\vec{e}_i \cdot \vec{v})\,\vec{e}_i$ only works directly when the $\vec{e}_i$ are orthonormal. Projecting onto a subspace spanned by a non-orthogonal basis needs the more general least-squares formula instead.
+</Callout>
+
+<Callout label="Common pitfall">
+  A projection is not generally invertible - many different vectors $\vec{v}$ can share the same shadow on the line, so you can't recover $\vec{v}$ from its projection alone.
+</Callout>
+
+## Connects to
+
+<ConceptLink id="math:linear-algebra:qr-decomposition" />
+<ConceptLink id="math:linear-algebra:pca" />
+
+## Self-check
+
+export const questions = [
+  {
+    question: "What's always true about the vector v minus its projection onto u?",
+    answer: "It's orthogonal to u.",
+    why: "The residual v - proj_u(v) is perpendicular to u by construction - that's precisely what makes the projection the closest point on the line through u.",
+  },
+  {
+    question: "If u and v point in exactly the same direction, what is proj_u(v)?",
+    answer: "v itself.",
+    why: "When v already lies on the line spanned by u, the closest point on that line to v is v, so the projection leaves it unchanged.",
+  },
+];
+
+<SelfCheck questions={questions} />
