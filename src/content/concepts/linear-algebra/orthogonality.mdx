@@ -1,0 +1,82 @@
+---
+id: "math:linear-algebra:orthogonality"
+kb: "math"
+title: "Orthogonality"
+section: "linear-algebra"
+prerequisites:
+  - "math:linear-algebra:vectors"
+related:
+  - "math:linear-algebra:projections"
+  - "math:linear-algebra:qr-decomposition"
+  - "math:linear-algebra:abstract-vector-spaces"
+difficulty: "core"
+status: "draft"
+hasInteractive: true
+tags: []
+description: "Two vectors are orthogonal when they meet at a right angle - a geometric idea with a one-line algebraic test: their dot product is zero."
+---
+
+import SymbolTooltip from "@daanish02/scaffold-core/components/notation/SymbolTooltip.tsx";
+import DraggableGeometry from "@daanish02/scaffold-core/components/interactive/DraggableGeometry.astro";
+import Callout from "@daanish02/scaffold-core/components/content/Callout.astro";
+import ConceptLink from "@daanish02/scaffold-core/components/content/ConceptLink.astro";
+import SelfCheck from "@daanish02/scaffold-core/components/interactive/SelfCheck.astro";
+
+## Intuition
+
+Two vectors are orthogonal when they point in directions that meet at a right angle - like the x-axis and y-axis. There's no need to measure the angle with a protractor: a single algebraic test, the dot product, tells you instantly. When the dot product of two vectors is zero, they're perpendicular; no other value of the dot product gives such a clean geometric fact.
+
+## Visual / interactive
+
+<DraggableGeometry initialPoints={[[3, 0], [0, 2]]} extent={6} />
+
+Drag either point (treating it as a vector from the origin). The two vectors shown start perpendicular - as you move them, watch how the angle between them changes. Their dot product $\vec{u} \cdot \vec{v} = u_1 v_1 + u_2 v_2$ is zero exactly when they're at a right angle; positive when the angle is acute, negative when obtuse.
+
+## Formal definition
+
+Two vectors{" "}
+<SymbolTooltip client:visible name="orthogonal" pronunciation="u perp v" meaning="vectors meeting at a right angle, with zero dot product">$\vec{u} \perp \vec{v}$</SymbolTooltip>{" "}
+are **orthogonal** if $\vec{u} \cdot \vec{v} = 0$.
+
+This follows from the general relationship between the dot product and the angle $\theta$ between two vectors:
+
+$$
+\vec{u} \cdot \vec{v} = \lVert \vec{u} \rVert \, \lVert \vec{v} \rVert \cos\theta
+$$
+
+Since $\cos(90^\circ) = 0$, orthogonality is exactly the case where this product vanishes (for nonzero vectors).
+
+A set of vectors is **orthonormal** if every pair is orthogonal *and* every vector has unit length ($\lVert \vec{v}_i \rVert = 1$) - the natural generalization of the standard basis axes.
+
+## Common pitfalls
+
+<Callout label="Common pitfall">
+  The zero vector is orthogonal to every vector (its dot product with anything is 0), but it has no direction - don't read "orthogonal" as implying two well-defined, nonzero directions unless you've checked both vectors are nonzero.
+</Callout>
+
+<Callout label="Common pitfall">
+  Orthogonal and orthonormal aren't the same: orthogonal only requires the right angle, while orthonormal also requires unit length. Two perpendicular vectors of length 5 and 3 are orthogonal but not orthonormal.
+</Callout>
+
+## Connects to
+
+<ConceptLink id="math:linear-algebra:projections" />
+<ConceptLink id="math:linear-algebra:qr-decomposition" />
+<ConceptLink id="math:linear-algebra:abstract-vector-spaces" />
+
+## Self-check
+
+export const questions = [
+  {
+    question: "If u . v = 0 for nonzero vectors u and v, what can you conclude?",
+    answer: "u and v are orthogonal (perpendicular).",
+    why: "A zero dot product between nonzero vectors means cos(theta) = 0, which happens exactly at a 90-degree angle.",
+  },
+  {
+    question: "Are two orthogonal unit vectors also orthonormal?",
+    answer: "Yes.",
+    why: "Orthonormal just means orthogonal plus unit length - if both conditions already hold, the set is orthonormal by definition.",
+  },
+];
+
+<SelfCheck questions={questions} />
